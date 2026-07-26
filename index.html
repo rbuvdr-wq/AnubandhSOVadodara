@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anubandh SO Dashboard - Vadodara Region</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            400: '#FACC15',
+                            500: '#EAB308',
+                            600: '#CA8A04',
+                        },
+                        darkbg: '#0b0f19',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-yellow': '0 0 15px rgba(234, 179, 8, 0.3)',
+                        'glow-red': '0 0 15px rgba(239, 68, 68, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- SheetJS for Excel Exports -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- HTML2Canvas for Screenshots -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(234, 179, 8, 0.4);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(234, 179, 8, 0.7);
+        }
+
+        /* Glassmorphism styling */
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            border-color: rgba(234, 179, 8, 0.2);
+        }
+        .light .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(203, 213, 225, 0.8);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+        }
+        .dark .sticky-col { background-color: #0f172a; }
+        .light .sticky-col { background-color: #f8fafc; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
+            .glass-panel { border: 1px solid #ccc !important; box-shadow: none !important; }
+        }
+
+        /* ==========================================================================
+           SUNRISE THEME (LIGHT MODE OVERRIDES)
+           Inspired by India Post colours: Sunrise Orange (#F57C00), Golden Yellow (#FFC107),
+           Deep Saffron (#FF9800), Warm White (#FFFDF7), Ivory (#FFF8E7), India Post Red (#C62828),
+           and Dark Charcoal (#212121) text for maximum readability.
+           ========================================================================== */
+        
+        html.light body {
+            background: linear-gradient(180deg, #FFF8E7 0%, #FFF3D6 45%, #FFFDF7 100%) !important;
+            color: #212121 !important;
+        }
+
+        /* Sunrise Glass Panels & Cards */
+        .light .glass-panel {
+            background: rgba(255, 253, 247, 0.95) !important;
+            border: 1px solid rgba(245, 124, 0, 0.3) !important;
+            box-shadow: 0 10px 30px rgba(198, 40, 40, 0.07), 0 2px 10px rgba(245, 124, 0, 0.1) !important;
+        }
+
+        /* Text Overrides for High Legibility */
+        .light h1, .light h2, .light h3, .light h4, 
+        .light .text-white, .light .text-slate-100, .light .text-slate-200 {
+            color: #212121 !important;
+        }
+        .light p, .light .text-slate-300, .light .text-slate-400 {
+            color: #424242 !important;
+        }
+
+        /* Header Gradient Title */
+        .light .bg-gradient-to-r.from-yellow-400.via-amber-200.to-white {
+            background-image: linear-gradient(to right, #C62828, #E65100, #212121) !important;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            color: transparent !important;
+        }
+
+        /* Inputs, Search Boxes & Dropdowns */
+        .light input[type="text"], 
+        .light select {
+            background-color: #FFFDF7 !important;
+            color: #212121 !important;
+            border: 1.5px solid #F57C00 !important;
+            box-shadow: 0 2px 6px rgba(245, 124, 0, 0.08) !important;
+        }
+        .light input[type="text"]::placeholder {
+            color: #757575 !important;
+        }
+        .light select option {
+            background-color: #FFFDF7 !important;
+            color: #212121 !important;
+        }
+        .light label {
+            color: #212121 !important;
+        }
+
+        /* Buttons & Controls */
+        .light .bg-slate-800 {
+            background-color: #FFF3D6 !important;
+            color: #212121 !important;
+            border: 1px solid #F57C00 !important;
+        }
+        .light .bg-slate-800:hover {
+            background-color: #FFE0B2 !important;
+            color: #C62828 !important;
+        }
+        .light .bg-slate-900\/80, .light .bg-slate-900\/60, .light .bg-slate-900, .light .bg-slate-950 {
+            background-color: #FFF8E7 !important;
+            border-color: rgba(245, 124, 0, 0.25) !important;
+        }
+
+        /* Banners & Highlights */
+        .light #selectionContextBanner {
+            background-color: #FFF3D6 !important;
+            border: 1px solid #F57C00 !important;
+            color: #212121 !important;
+        }
+        .light #selectionContextBanner span, .light #activeSelectionText {
+            color: #212121 !important;
+        }
+
+        /* Tables, Headers & Sticky Columns */
+        .light table {
+            border-color: rgba(245, 124, 0, 0.2) !important;
+        }
+        .light thead, .light thead th {
+            background-color: #FFE0B2 !important;
+            color: #212121 !important;
+            border-bottom: 2px solid #F57C00 !important;
+            font-weight: 800 !important;
+        }
+        .light tbody tr {
+            border-bottom: 1px solid rgba(245, 124, 0, 0.15) !important;
+        }
+        .light tbody tr.bg-slate-900\/40, 
+        .light tbody tr.bg-slate-950\/40 {
+            background-color: #FFFDF7 !important;
+        }
+        .light tbody tr:hover {
+            background-color: #FFF3D6 !important;
+        }
+        .light .sticky-col {
+            background-color: #FFF8E7 !important;
+            color: #212121 !important;
+        }
+        .light td {
+            color: #212121 !important;
+        }
+
+        /* Status & Metric Color Enhancements for Sunrise Theme */
+        .light .text-yellow-400 { color: #E65100 !important; }
+        .light .text-amber-300, .light .text-amber-400 { color: #D84315 !important; }
+        .light .text-emerald-400 { color: #1B5E20 !important; }
+        .light .text-blue-400 { color: #0D47A1 !important; }
+        .light .text-purple-400 { color: #4A148C !important; }
+        .light .text-rose-400, .light .text-red-400 { color: #C62828 !important; }
+        .light .text-slate-400 { color: #424242 !important; }
+
+        /* Section 2 Category Backgrounds */
+        .light .bg-emerald-950\/20 { background-color: rgba(46, 125, 50, 0.12) !important; }
+        .light .bg-blue-950\/20 { background-color: rgba(21, 101, 192, 0.12) !important; }
+        .light .bg-yellow-950\/20 { background-color: rgba(245, 124, 0, 0.15) !important; }
+        .light .bg-rose-950\/20 { background-color: rgba(198, 40, 40, 0.12) !important; }
+
+        /* Grand Total Row */
+        .light tr.bg-slate-950.text-yellow-400 {
+            background-color: #FFE0B2 !important;
+            color: #C62828 !important;
+            border-top: 2.5px solid #F57C00 !important;
+        }
+
+        /* Clock & Timers */
+        .light #countdownTimer, .light #liveTime {
+            color: #C62828 !important;
+        }
+        .light #liveDate {
+            color: #424242 !important;
+        }
+
+        /* Overlays & Modals */
+        .light #loadingOverlay {
+            background-color: rgba(255, 248, 231, 0.92) !important;
+        }
+        .light #errorModal {
+            background-color: rgba(255, 248, 231, 0.96) !important;
+        }
+    </style>
+</head>
+
+<body class="bg-darkbg text-slate-100 min-h-screen transition-colors duration-300 font-sans selection:bg-yellow-500 selection:text-black">
+
+    <!-- Navigation Header -->
+    <header class="glass-panel sticky top-0 z-50 px-4 py-3 border-b shadow-xl no-print">
+        <div class="max-w-[1920px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
+            
+            <!-- Branding -->
+            <div class="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-start">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-yellow-500 to-red-600 flex items-center justify-center shadow-glow-yellow text-black font-extrabold text-xl tracking-wider">
+                        <i class="fa-solid fa-shield-halved text-black"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-xl md:text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-200 to-white">
+                                ANUBANDH SO DASHBOARD
+                            </h1>
+                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
+                                COMMAND CENTER
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400 font-medium tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-location-dot text-yellow-500 text-[10px]"></i> Vadodara Region • Sub Office Performance Monitoring
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="lg:hidden flex items-center gap-2">
+                    <button id="mobileMenuBtn" onclick="toggleMobileControls()" class="p-2.5 rounded-lg bg-slate-800 text-yellow-400 border border-slate-700">
+                        <i class="fa-solid fa-sliders"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Global Header Controls -->
+            <div id="controlsContainer" class="hidden lg:flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
+                
+                <!-- Search Box -->
+                <div class="relative min-w-[220px] flex-1 md:flex-none">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="globalSearch" placeholder="Search PO, Division..." 
+                           oninput="handleGlobalSearch(this.value)"
+                           class="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-400 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all">
+                </div>
+
+                <!-- Countdown Timer -->
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-xs">
+                    <i class="fa-solid fa-rotate text-amber-400 animate-spin-slow"></i>
+                    <span class="text-slate-400">Refreshing in:</span>
+                    <span id="countdownTimer" class="font-bold text-yellow-400 font-mono text-sm">60</span><span class="text-yellow-400 text-[10px]">s</span>
+                </div>
+
+                <!-- Live Clock -->
+                <div class="hidden sm:flex flex-col text-right px-3 py-1 rounded-lg bg-slate-900/80 border border-slate-800">
+                    <span id="liveTime" class="text-xs font-bold text-slate-200 font-mono">--:--:--</span>
+                    <span id="liveDate" class="text-[10px] text-slate-400">-- --- ----</span>
+                </div>
+
+                <!-- Desktop / Mobile Toggle -->
+                <button onclick="toggleViewMode()" title="Toggle View Mode"
+                        class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all">
+                    <i id="viewModeIcon" class="fa-solid fa-desktop text-yellow-400"></i>
+                    <span id="viewModeText">Desktop View</span>
+                </button>
+
+                <!-- Dark / Light Theme Toggle -->
+                <button onclick="toggleTheme()" title="Toggle Theme"
+                        class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-yellow-400 border border-slate-700 transition-all">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+
+                <!-- Force Refresh -->
+                <button onclick="manualRefreshData()" title="Force Refresh Data"
+                        class="px-3 py-1.5 rounded-lg bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs flex items-center gap-1.5 shadow-glow-yellow transition-all">
+                    <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                </button>
+
+                <!-- Export Options Dropdown -->
+                <div class="relative inline-block text-left group">
+                    <button class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-glow-red transition-all">
+                        <i class="fa-solid fa-download"></i> Export <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </button>
+                    <div class="absolute right-0 mt-1 w-48 rounded-xl glass-panel bg-slate-900/95 border border-slate-700 shadow-2xl py-2 hidden group-hover:block z-50">
+                        <button onclick="exportToExcel()" class="w-full text-left px-4 py-2 text-xs text-slate-200 hover:bg-yellow-500/20 hover:text-yellow-400 flex items-center gap-2">
+                            <i class="fa-solid fa-file-excel text-green-500"></i> Export Excel (.xlsx)
+                        </button>
+                        <button onclick="exportToCSV()" class="w-full text-left px-4 py-2 text-xs text-slate-200 hover:bg-yellow-500/20 hover:text-yellow-400 flex items-center gap-2">
+                            <i class="fa-solid fa-file-csv text-blue-400"></i> Export CSV (.csv)
+                        </button>
+                        <button onclick="downloadScreenshot()" class="w-full text-left px-4 py-2 text-xs text-slate-200 hover:bg-yellow-500/20 hover:text-yellow-400 flex items-center gap-2">
+                            <i class="fa-solid fa-camera text-amber-400"></i> Dashboard Screenshot
+                        </button>
+                        <div class="border-t border-slate-800 my-1"></div>
+                        <button onclick="window.print()" class="w-full text-left px-4 py-2 text-xs text-slate-200 hover:bg-yellow-500/20 hover:text-yellow-400 flex items-center gap-2">
+                            <i class="fa-solid fa-print text-purple-400"></i> Print Dashboard
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-[1920px] mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- SECTION 1: Individual SO Performance -->
+        <section class="glass-panel rounded-2xl p-5 shadow-2xl relative">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-1 rounded-md bg-yellow-500 text-black font-extrabold text-xs">SECTION 01</span>
+                        <h2 class="text-lg md:text-xl font-bold text-white tracking-tight">Individual SO Performance</h2>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Select Division, Subdivision, and Sub Office to analyze indicator targets and achievements.</p>
+                </div>
+
+                <!-- Raw Data Download -->
+                <button onclick="downloadRawData()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg transition-all w-fit">
+                    <i class="fa-solid fa-file-excel"></i> Download Complete Raw Data
+                </button>
+            </div>
+
+            <!-- Cascading Dropdowns -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-5 p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-filter text-yellow-500"></i> Division Filter
+                    </label>
+                    <select id="divisionFilter" onchange="onDivisionChange()" 
+                            class="w-full px-3 py-2 text-xs font-semibold rounded-lg bg-slate-950 border border-slate-700 text-slate-100 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
+                        <option value="ALL">ALL DIVISIONS</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-sitemap text-amber-400"></i> Subdivision Filter
+                    </label>
+                    <select id="subdivisionFilter" onchange="onSubdivisionChange()" 
+                            class="w-full px-3 py-2 text-xs font-semibold rounded-lg bg-slate-950 border border-slate-700 text-slate-100 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
+                        <option value="ALL">ALL SUBDIVISIONS</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-building-flag text-blue-400"></i> PO Name Filter
+                    </label>
+                    <select id="poFilter" onchange="onPOChange()" 
+                            class="w-full px-3 py-2 text-xs font-semibold rounded-lg bg-slate-950 border border-slate-700 text-slate-100 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
+                        <option value="ALL">ALL SUB OFFICES</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Active Context Banner -->
+            <div id="selectionContextBanner" class="mb-4 text-xs font-mono px-4 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 flex items-center justify-between">
+                <span><i class="fa-solid fa-info-circle mr-1"></i> Active Selection: <strong id="activeSelectionText">ALL SUB OFFICES</strong></span>
+                <span id="matchingCountText" class="text-slate-300 font-bold">0 records matched</span>
+            </div>
+
+            <!-- Table View: Section 1 Matrix -->
+            <div id="desktopTableView" class="overflow-x-auto rounded-xl border border-slate-800">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-950 text-slate-300 font-bold uppercase tracking-wider text-[11px] border-b border-slate-800">
+                        <tr>
+                            <th class="p-3.5 sticky-col bg-slate-950 min-w-[220px]">Metric / Indicator</th>
+                            <th class="p-3.5 text-right bg-slate-900/80 text-yellow-400">Annual Target</th>
+                            <th class="p-3.5 text-right bg-slate-900/80 text-amber-300">Proportionate TTD Target</th>
+                            <th class="p-3.5 text-right bg-slate-900/80 text-emerald-400">GTD Achievement</th>
+                            <th class="p-3.5 text-right bg-slate-900/80 text-blue-400">% Achievement Annual</th>
+                            <th class="p-3.5 text-right bg-slate-900/80 text-purple-400">% Achievement TTD</th>
+                        </tr>
+                    </thead>
+                    <tbody id="section1TableBody" class="divide-y divide-slate-800 font-mono">
+                        <!-- Rendered dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile View: Section 1 Cards -->
+            <div id="mobileCardsView" class="hidden space-y-4">
+                <!-- Rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- SECTION 2: Division Wise SO Performance -->
+        <section class="glass-panel rounded-2xl p-5 shadow-2xl relative">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-1 rounded-md bg-red-600 text-white font-extrabold text-xs">SECTION 02</span>
+                        <h2 class="text-lg md:text-xl font-bold text-white tracking-tight">Division Wise SO Performance</h2>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Classified Sub Office count based on sheet Milestone column. Click any numeric count cell to export matching Sub Office records.</p>
+                </div>
+
+                <!-- Category Dropdown -->
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-bold text-slate-300">Category Select:</label>
+                    <select id="matrixCategorySelect" onchange="renderSection2Matrix()" 
+                            class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-900 border border-yellow-500/50 text-yellow-400 focus:outline-none">
+                        <option value="Total Revenue">Total Revenue</option>
+                        <option value="Parcel Revenue">Parcel Revenue</option>
+                        <option value="International Mails Revenue">International Mails Revenue</option>
+                        <option value="Domestic Mails Revenue">Domestic Mails Revenue</option>
+                        <option value="POSB Net Addition">POSB Net Addition</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Division Performance Matrix Table -->
+            <div class="overflow-x-auto rounded-xl border border-slate-800 mt-5">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-950 text-slate-300 font-bold uppercase tracking-wider text-[11px] border-b border-slate-800">
+                        <tr>
+                            <th class="p-3.5 sticky-col bg-slate-950 min-w-[180px]">Division</th>
+                            <th class="p-3.5 text-center text-emerald-400 bg-emerald-950/20">Achiever</th>
+                            <th class="p-3.5 text-center text-blue-400 bg-blue-950/20">Potential</th>
+                            <th class="p-3.5 text-center text-yellow-400 bg-yellow-950/20">Improving</th>
+                            <th class="p-3.5 text-center text-rose-400 bg-rose-950/20">Inactive</th>
+                            <th class="p-3.5 text-center bg-slate-900 text-white">Total SOs</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrixTableBody" class="divide-y divide-slate-800 font-mono text-center">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Glass Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-xl transition-opacity duration-300">
+        <div class="relative flex flex-col items-center p-8 rounded-2xl glass-panel max-w-sm text-center">
+            <div class="w-16 h-16 rounded-full border-4 border-yellow-500/20 border-t-yellow-500 animate-spin mb-4"></div>
+            <h3 class="text-lg font-black text-white tracking-wider">LOADING LIVE DATA</h3>
+            <p id="loadingStatusText" class="text-xs text-slate-400 mt-1">Connecting to Vadodara Region Command Sheet...</p>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+                <div id="loadingProgressBar" class="bg-gradient-to-r from-yellow-500 to-red-500 h-full w-1/3 transition-all duration-300"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4">
+        <div class="glass-panel p-6 rounded-2xl max-w-md w-full border border-red-500/50 text-center shadow-2xl">
+            <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center mx-auto mb-3 text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white">Data Connection Alert</h3>
+            <p id="errorMessage" class="text-xs text-slate-300 mt-2">Unable to load live Google Sheet CSV data. Check network or source permissions.</p>
+            <div class="flex gap-3 mt-5">
+                <button onclick="manualRefreshData()" class="flex-1 py-2 rounded-lg bg-yellow-500 text-black font-bold text-xs shadow-glow-yellow">
+                    <i class="fa-solid fa-rotate-right"></i> Retry Connection
+                </button>
+                <button onclick="useMockFallbackData()" class="flex-1 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700">
+                    Use Sample Offline Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Google Sheet CSV source
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXp4NFiFp_HHryeiqdDulUTwPHG7XnAawNJdzB0iREiLOrFjDtDVgW0TmTArrJ51KpxdjVD9-Fz36P/pub?gid=0&single=true&output=csv';
+
+        // Core Dashboard State
+        let appState = {
+            rawDataset: [],
+            filteredDataset: [],
+            divisions: [],
+            subdivisions: [],
+            pos: [],
+            selectedDivision: 'ALL',
+            selectedSubdivision: 'ALL',
+            selectedPO: 'ALL',
+            searchQuery: '',
+            theme: 'dark',
+            viewMode: 'desktop',
+            countdown: 60,
+            timerInstance: null,
+            lastRefreshedAt: null,
+            matrixCategory: 'Total Revenue'
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeClock();
+            loadStateFromLocalStorage();
+            applyTheme();
+            applyViewMode();
+            fetchDashboardData();
+            startAutoRefreshTimer();
+        });
+
+        // Theme management functions
+        function applyTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('themeIcon');
+            if (appState.theme === 'light') {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                if (themeIcon) themeIcon.className = 'fa-solid fa-sun text-yellow-500';
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                if (themeIcon) themeIcon.className = 'fa-solid fa-moon text-yellow-400';
+            }
+        }
+
+        function toggleTheme() {
+            appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
+            applyTheme();
+            saveStateToLocalStorage();
+        }
+
+        // View mode management (Desktop vs Mobile)
+        function applyViewMode() {
+            const tableView = document.getElementById('desktopTableView');
+            const cardsView = document.getElementById('mobileCardsView');
+            const icon = document.getElementById('viewModeIcon');
+            const text = document.getElementById('viewModeText');
+
+            if (appState.viewMode === 'mobile') {
+                if (tableView) tableView.classList.add('hidden');
+                if (cardsView) cardsView.classList.remove('hidden');
+                if (icon) icon.className = 'fa-solid fa-mobile-screen text-yellow-400';
+                if (text) text.textContent = 'Mobile View';
+            } else {
+                if (tableView) tableView.classList.remove('hidden');
+                if (cardsView) cardsView.classList.add('hidden');
+                if (icon) icon.className = 'fa-solid fa-desktop text-yellow-400';
+                if (text) text.textContent = 'Desktop View';
+            }
+        }
+
+        function toggleViewMode() {
+            appState.viewMode = appState.viewMode === 'desktop' ? 'mobile' : 'desktop';
+            applyViewMode();
+            saveStateToLocalStorage();
+        }
+
+        function toggleMobileControls() {
+            const controls = document.getElementById('controlsContainer');
+            if (controls) {
+                controls.classList.toggle('hidden');
+            }
+        }
+
+        // Strict exact-header value parsing helper (no fuzzy/partial matching)
+        function parseVal(row, key) {
+            if (!row || !key) return null;
+            const raw = row[key];
+            if (raw === undefined || raw === null) return null;
+            const str = String(raw).trim();
+            if (str === '' || str === '-') return null;
+            
+            // Read directly as a numeric value without string manipulation or dividing
+            const clean = str.replace(/,/g, '').trim();
+            const num = Number(clean);
+            return isNaN(num) ? null : num;
+        }
+
+        // Strict exact-header string parsing helper
+        function parseStr(row, key, defaultVal = '') {
+            if (!row || !key) return defaultVal;
+            const raw = row[key];
+            if (raw === undefined || raw === null) return defaultVal;
+            return String(raw).trim();
+        }
+
+        function initializeClock() {
+            const updateTime = () => {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                
+                const timeEl = document.getElementById('liveTime');
+                const dateEl = document.getElementById('liveDate');
+                if (timeEl) timeEl.textContent = timeStr;
+                if (dateEl) dateEl.textContent = dateStr;
+            };
+            updateTime();
+            setInterval(updateTime, 1000);
+        }
+
+        function saveStateToLocalStorage() {
+            const stateToSave = {
+                selectedDivision: appState.selectedDivision,
+                selectedSubdivision: appState.selectedSubdivision,
+                selectedPO: appState.selectedPO,
+                theme: appState.theme,
+                viewMode: appState.viewMode,
+                matrixCategory: document.getElementById('matrixCategorySelect')?.value || 'Total Revenue'
+            };
+            localStorage.setItem('anubandh_so_dashboard_state', JSON.stringify(stateToSave));
+        }
+
+        function loadStateFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem('anubandh_so_dashboard_state');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    appState.selectedDivision = parsed.selectedDivision || 'ALL';
+                    appState.selectedSubdivision = parsed.selectedSubdivision || 'ALL';
+                    appState.selectedPO = parsed.selectedPO || 'ALL';
+                    appState.theme = parsed.theme || 'dark';
+                    appState.viewMode = parsed.viewMode || 'desktop';
+                    if (parsed.matrixCategory) {
+                        const select = document.getElementById('matrixCategorySelect');
+                        if (select) select.value = parsed.matrixCategory;
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not read state from local storage', e);
+            }
+        }
+
+        function fetchDashboardData(isBackground = false) {
+            if (!isBackground) {
+                showLoading(true, "Fetching latest sheet data...");
+            }
+
+            Papa.parse(SHEET_CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                dynamicTyping: false,
+                complete: function (results) {
+                    if (results && results.data && results.data.length > 0) {
+                        const cleanedData = results.data.map(row => {
+                            const cleanRow = {};
+                            Object.keys(row).forEach(key => {
+                                const cleanKey = key.replace(/\uFEFF/g, '').replace(/\r/g, '').replace(/\n/g, '').trim();
+                                cleanRow[cleanKey] = row[cleanKey];
+                            });
+                            return cleanRow;
+                        });
+
+                        if (cleanedData.length > 0) {
+                            console.log("=== ANUBANDH DASHBOARD SHEET DATA LOADED ===");
+                            console.table(Object.keys(cleanedData[0]));
+                            console.log("Total Records Loaded:", cleanedData.length);
+                            console.log("First Record Object:", cleanedData[0]);
+                        }
+
+                        processRawData(cleanedData, isBackground);
+                        if (!isBackground) showLoading(false);
+                    } else {
+                        useMockFallbackData(isBackground);
+                    }
+                },
+                error: function (err) {
+                    console.error("Fetch Error:", err);
+                    useMockFallbackData(isBackground);
+                }
+            });
+        }
+
+        function processRawData(data, isBackground = false) {
+            appState.rawDataset = data.map((row, idx) => {
+                // Console Validation Log for First Record
+                if (idx === 0) {
+                    console.log("=== FIRST RECORD HEADER VALIDATION ===");
+                    console.log("Annual_Total_Revenue_Target =", row["Annual_Total_Revenue_Target"]);
+                    console.log("Proportionate_TTD_TotalRevenue =", row["Proportionate_TTD_TotalRevenue"]);
+                    console.log("Total_Revenue_GTD =", row["Total_Revenue_GTD"]);
+                    console.log("Annual Total Revenue % =", Number(row["% Achievement_Annual_TotalRevenue"]));
+                    console.log("TTD Total Revenue % =", Number(row["% Achievement_TTD_TotalRevenue"]));
+                }
+
+                return {
+                    id: idx + 1,
+                    Division: parseStr(row, 'Division', 'Vadodara'),
+                    Subdivision: parseStr(row, 'Subdivision', 'Subdivision A'),
+                    PO_Name: parseStr(row, 'PO_Name', `PO ${idx + 1}`),
+
+                    Annual_Total_Revenue_Target: parseVal(row, 'Annual_Total_Revenue_Target'),
+                    Proportionate_TTD_TotalRevenue: parseVal(row, 'Proportionate_TTD_TotalRevenue'),
+                    Total_Revenue_GTD: parseVal(row, 'Total_Revenue_GTD'),
+                    Ach_Annual_TotalRevenue: parseVal(row, '% Achievement_Annual_TotalRevenue'),
+                    Ach_TTD_TotalRevenue: parseVal(row, '% Achievement_TTD_TotalRevenue'),
+
+                    Annual_Parcel_Revenue_Target: parseVal(row, 'Annual_Parcel_Revenue_Target'),
+                    Proportionate_TTD_Parcel: parseVal(row, 'Proportionate_TTD_Parcel'),
+                    Parcel_Revenue_GTD: parseVal(row, 'Parcel_Revenue_GTD'),
+                    Ach_Annual_Parcel: parseVal(row, '% Achievement_Annual_Parcel'),
+                    Ach_TTD_Parcel: parseVal(row, '% Achievement_TTD_Parcel'),
+
+                    Annual_InternationalMails_Revenue_Target: parseVal(row, 'Annual_InternationalMails_Revenue_Target'),
+                    Proportionate_TTD_InternationalMails: parseVal(row, 'Proportionate_TTD_InternationalMails'),
+                    InternationalMails_Revenue_GTD: parseVal(row, 'InternationalMails_Revenue_GTD'),
+                    Ach_Annual_InternationalMails: parseVal(row, '% Achievement_Annual_InternationalMails'),
+                    Ach_TTD_InternationalMails: parseVal(row, '% Achievement_TTD_InternationalMails'),
+
+                    Annual_DomesticMails_Revenue_Target: parseVal(row, 'Annual_DomesticMails_Revenue_Target'),
+                    Proportionate_TTD_DomesticMails: parseVal(row, 'Proportionate_TTD_DomesticMails'),
+                    DomesticMails_Revenue_GTD: parseVal(row, 'DomesticMails_Revenue_GTD'),
+                    Ach_Annual_DomesticMails: parseVal(row, '% Achievement_Annual_DomesticMails'),
+                    Ach_TTD_DomesticMails: parseVal(row, '% Achievement_TTD_DomesticMails'),
+
+                    Annual_POSBNetAddition_Target: parseVal(row, 'Annual_POSBNetAddition_Target'),
+                    POSBNetAddition_GTD: parseVal(row, 'POSBNetAddition_GTD'),
+                    Ach_Annual_POSBNetAddition: parseVal(row, '% Achievement_Annual_POSBNetAddition'),
+
+                    Total_revenue_category: parseStr(row, 'Total_revenue_category'),
+                    Parcel_revenue_category: parseStr(row, 'Parcel_revenue_category'),
+                    InternationalMails_revenue_category: parseStr(row, 'InternationalMails_revenue_category'),
+                    Domesticmails_revenue_category: parseStr(row, 'Domesticmails_revenue_category'),
+                    POSB_Netaddition_category: parseStr(row, 'POSB_Netaddition_category')
+                };
+            });
+
+            if (!isBackground) {
+                extractUniqueHierarchy();
+            }
+            applyFiltersAndRender();
+        }
+
+        function extractUniqueHierarchy() {
+            const divisionsSet = new Set();
+            const subdivisionsSet = new Set();
+            const posSet = new Set();
+
+            appState.rawDataset.forEach(row => {
+                if (row.Division) divisionsSet.add(row.Division);
+                if (row.Subdivision) subdivisionsSet.add(row.Subdivision);
+                if (row.PO_Name) posSet.add(row.PO_Name);
+            });
+
+            appState.divisions = Array.from(divisionsSet).sort();
+            appState.subdivisions = Array.from(subdivisionsSet).sort();
+            appState.pos = Array.from(posSet).sort();
+
+            populateDropdown('divisionFilter', appState.divisions, appState.selectedDivision, 'ALL DIVISIONS');
+            updateSubdivisionDropdown();
+            updatePODropdown();
+        }
+
+        function populateDropdown(id, items, selectedVal, defaultLabel) {
+            const select = document.getElementById(id);
+            if (!select) return;
+            select.innerHTML = `<option value="ALL">${defaultLabel}</option>`;
+            items.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item;
+                opt.textContent = item;
+                if (item === selectedVal) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        function updateSubdivisionDropdown() {
+            let filteredSubs = [];
+            if (appState.selectedDivision === 'ALL') {
+                filteredSubs = appState.subdivisions;
+            } else {
+                const set = new Set();
+                appState.rawDataset.forEach(row => {
+                    if (row.Division === appState.selectedDivision && row.Subdivision) {
+                        set.add(row.Subdivision);
+                    }
+                });
+                filteredSubs = Array.from(set).sort();
+            }
+            populateDropdown('subdivisionFilter', filteredSubs, appState.selectedSubdivision, 'ALL SUBDIVISIONS');
+        }
+
+        function updatePODropdown() {
+            let filteredPOs = [];
+            let dataset = appState.rawDataset;
+
+            if (appState.selectedDivision !== 'ALL') {
+                dataset = dataset.filter(row => row.Division === appState.selectedDivision);
+            }
+            if (appState.selectedSubdivision !== 'ALL') {
+                dataset = dataset.filter(row => row.Subdivision === appState.selectedSubdivision);
+            }
+
+            const set = new Set();
+            dataset.forEach(row => {
+                if (row.PO_Name) set.add(row.PO_Name);
+            });
+            filteredPOs = Array.from(set).sort();
+
+            populateDropdown('poFilter', filteredPOs, appState.selectedPO, 'ALL SUB OFFICES');
+        }
+
+        function onDivisionChange() {
+            const select = document.getElementById('divisionFilter');
+            appState.selectedDivision = select ? select.value : 'ALL';
+            appState.selectedSubdivision = 'ALL';
+            appState.selectedPO = 'ALL';
+
+            updateSubdivisionDropdown();
+            updatePODropdown();
+            saveStateToLocalStorage();
+            applyFiltersAndRender();
+        }
+
+        function onSubdivisionChange() {
+            const select = document.getElementById('subdivisionFilter');
+            appState.selectedSubdivision = select ? select.value : 'ALL';
+            appState.selectedPO = 'ALL';
+
+            updatePODropdown();
+            saveStateToLocalStorage();
+            applyFiltersAndRender();
+        }
+
+        function onPOChange() {
+            const select = document.getElementById('poFilter');
+            appState.selectedPO = select ? select.value : 'ALL';
+            saveStateToLocalStorage();
+            applyFiltersAndRender();
+        }
+
+        function handleGlobalSearch(query) {
+            appState.searchQuery = (query || '').toLowerCase().trim();
+            applyFiltersAndRender();
+        }
+
+        function applyFiltersAndRender() {
+            let filtered = appState.rawDataset;
+
+            if (appState.selectedDivision !== 'ALL') {
+                filtered = filtered.filter(r => r.Division === appState.selectedDivision);
+            }
+            if (appState.selectedSubdivision !== 'ALL') {
+                filtered = filtered.filter(r => r.Subdivision === appState.selectedSubdivision);
+            }
+            if (appState.selectedPO !== 'ALL') {
+                filtered = filtered.filter(r => r.PO_Name === appState.selectedPO);
+            }
+
+            if (appState.searchQuery) {
+                const q = appState.searchQuery;
+                filtered = filtered.filter(r => 
+                    (r.PO_Name && r.PO_Name.toLowerCase().includes(q)) ||
+                    (r.Division && r.Division.toLowerCase().includes(q)) ||
+                    (r.Subdivision && r.Subdivision.toLowerCase().includes(q))
+                );
+            }
+
+            appState.filteredDataset = filtered;
+
+            // Context Banner update
+            const contextText = document.getElementById('activeSelectionText');
+            const countText = document.getElementById('matchingCountText');
+            
+            if (contextText) {
+                let contextStr = appState.selectedDivision;
+                if (appState.selectedSubdivision !== 'ALL') contextStr += ` > ${appState.selectedSubdivision}`;
+                if (appState.selectedPO !== 'ALL') contextStr += ` > ${appState.selectedPO}`;
+                contextText.textContent = contextStr;
+            }
+            if (countText) {
+                countText.textContent = `${filtered.length} record(s) matched`;
+            }
+
+            renderSection1Table();
+            renderSection2Matrix();
+        }
+
+        function renderSection1Table() {
+            const tbody = document.getElementById('section1TableBody');
+            const cardsContainer = document.getElementById('mobileCardsView');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            cardsContainer.innerHTML = '';
+
+            const data = appState.filteredDataset;
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">No matching Sub Office records found.</td></tr>`;
+                cardsContainer.innerHTML = `<div class="p-6 text-center text-slate-400 glass-panel rounded-xl">No records matching search or filters.</div>`;
+                return;
+            }
+
+            const isSingle = (data.length === 1);
+
+            const calcSum = (key) => data.reduce((acc, row) => acc + (row[key] !== null && row[key] !== undefined && !isNaN(row[key]) ? row[key] : 0), 0);
+            const calcAvg = (key) => {
+                let sum = 0, count = 0;
+                data.forEach(row => {
+                    const val = row[key];
+                    if (val !== null && val !== undefined && !isNaN(val)) {
+                        sum += val;
+                        count++;
+                    }
+                });
+                return count > 0 ? (sum / count) : null;
+            };
+
+            const getIndicatorData = (targetKey, propKey, gtdKey, annAchKey, ttdAchKey) => {
+                if (isSingle) {
+                    return {
+                        annualTarget: data[0][targetKey],
+                        propTarget: propKey ? data[0][propKey] : null,
+                        gtdAch: data[0][gtdKey],
+                        annAchPct: data[0][annAchKey],
+                        ttdAchPct: ttdAchKey ? data[0][ttdAchKey] : null
+                    };
+                }
+                return {
+                    annualTarget: calcSum(targetKey),
+                    propTarget: propKey ? calcSum(propKey) : null,
+                    gtdAch: calcSum(gtdKey),
+                    annAchPct: calcAvg(annAchKey),
+                    ttdAchPct: ttdAchKey ? calcAvg(ttdAchKey) : null
+                };
+            };
+
+            const indicators = [
+                {
+                    name: 'Total Revenue',
+                    ...getIndicatorData('Annual_Total_Revenue_Target', 'Proportionate_TTD_TotalRevenue', 'Total_Revenue_GTD', 'Ach_Annual_TotalRevenue', 'Ach_TTD_TotalRevenue'),
+                    color: 'text-yellow-400'
+                },
+                {
+                    name: 'Parcel Revenue',
+                    ...getIndicatorData('Annual_Parcel_Revenue_Target', 'Proportionate_TTD_Parcel', 'Parcel_Revenue_GTD', 'Ach_Annual_Parcel', 'Ach_TTD_Parcel'),
+                    color: 'text-blue-400'
+                },
+                {
+                    name: 'International Mails Revenue',
+                    ...getIndicatorData('Annual_InternationalMails_Revenue_Target', 'Proportionate_TTD_InternationalMails', 'InternationalMails_Revenue_GTD', 'Ach_Annual_InternationalMails', 'Ach_TTD_InternationalMails'),
+                    color: 'text-purple-400'
+                },
+                {
+                    name: 'Domestic Mails Revenue',
+                    ...getIndicatorData('Annual_DomesticMails_Revenue_Target', 'Proportionate_TTD_DomesticMails', 'DomesticMails_Revenue_GTD', 'Ach_Annual_DomesticMails', 'Ach_TTD_DomesticMails'),
+                    color: 'text-emerald-400'
+                },
+                {
+                    name: 'POSB Net Addition',
+                    ...getIndicatorData('Annual_POSBNetAddition_Target', null, 'POSBNetAddition_GTD', 'Ach_Annual_POSBNetAddition', null),
+                    color: 'text-rose-400'
+                }
+            ];
+
+            indicators.forEach((ind, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = (idx % 2 === 0 ? 'bg-slate-900/40 hover:bg-slate-800/60' : 'bg-slate-950/40 hover:bg-slate-800/60');
+
+                tr.innerHTML = `
+                    <td class="p-3.5 sticky-col bg-slate-950 font-bold ${ind.color} whitespace-nowrap">
+                        ${ind.name}
+                    </td>
+                    <td class="p-3.5 text-right font-semibold">${formatNumber(ind.annualTarget)}</td>
+                    <td class="p-3.5 text-right font-semibold">${ind.propTarget !== null ? formatNumber(ind.propTarget) : '-'}</td>
+                    <td class="p-3.5 text-right font-bold text-emerald-400">${formatNumber(ind.gtdAch)}</td>
+                    <td class="p-3.5 text-right font-bold ${badgeColor(ind.annAchPct)}">${ind.annAchPct !== null ? formatPercent(ind.annAchPct) : '-'}</td>
+                    <td class="p-3.5 text-right font-bold ${badgeColor(ind.ttdAchPct)}">${ind.ttdAchPct !== null ? formatPercent(ind.ttdAchPct) : '-'}</td>
+                `;
+                tbody.appendChild(tr);
+
+                // Mobile Card View
+                const card = document.createElement('div');
+                card.className = 'glass-panel p-4 rounded-xl space-y-2 border border-slate-800';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <span class="font-bold text-sm ${ind.color}">${ind.name}</span>
+                        <span class="text-[10px] font-bold text-slate-400">${isSingle ? 'Single SO' : 'Aggregated (' + data.length + ' SOs)'}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                        <div class="bg-slate-900/60 p-2 rounded-lg">
+                            <span class="text-[10px] text-slate-400 block">Annual Target</span>
+                            <span class="text-slate-200 font-bold">${formatNumber(ind.annualTarget)}</span>
+                        </div>
+                        <div class="bg-slate-900/60 p-2 rounded-lg">
+                            <span class="text-[10px] text-slate-400 block">GTD Achievement</span>
+                            <span class="text-emerald-400 font-bold">${formatNumber(ind.gtdAch)}</span>
+                        </div>
+                        <div class="bg-slate-900/60 p-2 rounded-lg">
+                            <span class="text-[10px] text-slate-400 block">% Ann Ach</span>
+                            <span class="font-bold ${badgeColor(ind.annAchPct)}">${ind.annAchPct !== null ? formatPercent(ind.annAchPct) : '-'}</span>
+                        </div>
+                        <div class="bg-slate-900/60 p-2 rounded-lg">
+                            <span class="text-[10px] text-slate-400 block">% TTD Ach</span>
+                            <span class="font-bold ${badgeColor(ind.ttdAchPct)}">${ind.ttdAchPct !== null ? formatPercent(ind.ttdAchPct) : '-'}</span>
+                        </div>
+                    </div>
+                `;
+                cardsContainer.appendChild(card);
+            });
+        }
+
+        function renderSection2Matrix() {
+            const tbody = document.getElementById('matrixTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const selectedCategoryField = document.getElementById('matrixCategorySelect')?.value || 'Total Revenue';
+            
+            const categoryKeyMap = {
+                'Total Revenue': 'Total_revenue_category',
+                'Parcel Revenue': 'Parcel_revenue_category',
+                'International Mails Revenue': 'InternationalMails_revenue_category',
+                'Domestic Mails Revenue': 'Domesticmails_revenue_category',
+                'POSB Net Addition': 'POSB_Netaddition_category'
+            };
+
+            const targetKey = categoryKeyMap[selectedCategoryField] || 'Total_revenue_category';
+
+            // Group filtered records by Division
+            const divisionMap = {};
+
+            appState.filteredDataset.forEach(row => {
+                const div = row.Division || 'Unknown Division';
+                if (!divisionMap[div]) {
+                    divisionMap[div] = { achiever: 0, potential: 0, improving: 0, inactive: 0, total: 0 };
+                }
+
+                const catVal = String(row[targetKey] || '').toLowerCase().trim();
+
+                if (catVal.includes('achiever')) {
+                    divisionMap[div].achiever++;
+                } else if (catVal.includes('potential')) {
+                    divisionMap[div].potential++;
+                } else if (catVal.includes('improving')) {
+                    divisionMap[div].improving++;
+                } else if (catVal.includes('inactive')) {
+                    divisionMap[div].inactive++;
+                }
+
+                divisionMap[div].total++;
+            });
+
+            const divisions = Object.keys(divisionMap).sort();
+
+            if (divisions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">No division matrix data available.</td></tr>`;
+                return;
+            }
+
+            let grandAchiever = 0, grandPotential = 0, grandImproving = 0, grandInactive = 0, grandTotal = 0;
+
+            divisions.forEach((div, idx) => {
+                const d = divisionMap[div];
+                grandAchiever += d.achiever;
+                grandPotential += d.potential;
+                grandImproving += d.improving;
+                grandInactive += d.inactive;
+                grandTotal += d.total;
+
+                const tr = document.createElement('tr');
+                tr.className = (idx % 2 === 0 ? 'bg-slate-900/40 hover:bg-slate-800/60' : 'bg-slate-950/40 hover:bg-slate-800/60');
+
+                tr.innerHTML = `
+                    <td class="p-3.5 text-left sticky-col bg-slate-950 font-bold text-slate-200">${div}</td>
+                    <td class="p-3.5 text-center text-emerald-400 font-bold hover:underline cursor-pointer" onclick="exportCategorySubset('${div}', 'Achiever')">${d.achiever}</td>
+                    <td class="p-3.5 text-center text-blue-400 font-bold hover:underline cursor-pointer" onclick="exportCategorySubset('${div}', 'Potential')">${d.potential}</td>
+                    <td class="p-3.5 text-center text-yellow-400 font-bold hover:underline cursor-pointer" onclick="exportCategorySubset('${div}', 'Improving')">${d.improving}</td>
+                    <td class="p-3.5 text-center text-rose-400 font-bold hover:underline cursor-pointer" onclick="exportCategorySubset('${div}', 'Inactive')">${d.inactive}</td>
+                    <td class="p-3.5 text-center text-white font-bold bg-slate-900/80">${d.total}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Grand Total Row
+            const totalTr = document.createElement('tr');
+            totalTr.className = 'bg-slate-950 text-yellow-400 font-black border-t-2 border-yellow-500/50';
+            totalTr.innerHTML = `
+                <td class="p-3.5 text-left sticky-col bg-slate-950 uppercase tracking-wider">Grand Total</td>
+                <td class="p-3.5 text-center text-emerald-400">${grandAchiever}</td>
+                <td class="p-3.5 text-center text-blue-400">${grandPotential}</td>
+                <td class="p-3.5 text-center text-yellow-400">${grandImproving}</td>
+                <td class="p-3.5 text-center text-rose-400">${grandInactive}</td>
+                <td class="p-3.5 text-center text-white bg-slate-900">${grandTotal}</td>
+            `;
+            tbody.appendChild(totalTr);
+        }
+
+        function exportCategorySubset(division, category) {
+            const selectedCategoryField = document.getElementById('matrixCategorySelect')?.value || 'Total Revenue';
+            const categoryKeyMap = {
+                'Total Revenue': 'Total_revenue_category',
+                'Parcel Revenue': 'Parcel_revenue_category',
+                'International Mails Revenue': 'InternationalMails_revenue_category',
+                'Domestic Mails Revenue': 'Domesticmails_revenue_category',
+                'POSB Net Addition': 'POSB_Netaddition_category'
+            };
+            const targetKey = categoryKeyMap[selectedCategoryField] || 'Total_revenue_category';
+
+            const filtered = appState.rawDataset.filter(row => {
+                const matchesDiv = (division === 'ALL' || row.Division === division);
+                const catVal = String(row[targetKey] || '').toLowerCase().trim();
+                const matchesCat = catVal.includes(category.toLowerCase());
+                return matchesDiv && matchesCat;
+            });
+
+            if (filtered.length === 0) {
+                alert(`No records found for ${division} - ${category}`);
+                return;
+            }
+
+            const ws = XLSX.utils.json_to_sheet(filtered);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "SO Subset");
+            XLSX.writeFile(wb, `Anubandh_${division}_${category}.xlsx`);
+        }
+
+        function exportToExcel() {
+            const ws = XLSX.utils.json_to_sheet(appState.filteredDataset);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Filtered SO Performance");
+            XLSX.writeFile(wb, "Anubandh_SO_Performance.xlsx");
+        }
+
+        function exportToCSV() {
+            const csv = Papa.unparse(appState.filteredDataset);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "Anubandh_SO_Performance.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function downloadRawData() {
+            const ws = XLSX.utils.json_to_sheet(appState.rawDataset);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Raw Data");
+            XLSX.writeFile(wb, "Anubandh_SO_Raw_Data.xlsx");
+        }
+
+        function downloadScreenshot() {
+            html2canvas(document.body).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Anubandh_SO_Dashboard_Screenshot.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        function badgeColor(pct) {
+            if (pct === null || pct === undefined || isNaN(pct)) return 'text-slate-400';
+            if (pct >= 100) return 'text-emerald-400';
+            if (pct >= 70) return 'text-yellow-400';
+            return 'text-rose-400';
+        }
+
+        function showLoading(show, message = "Loading...") {
+            const overlay = document.getElementById('loadingOverlay');
+            const statusText = document.getElementById('loadingStatusText');
+            if (overlay) {
+                if (show) {
+                    overlay.classList.remove('hidden');
+                    if (statusText) statusText.textContent = message;
+                } else {
+                    overlay.classList.add('hidden');
+                }
+            }
+        }
+
+        function useMockFallbackData(isBackground = false) {
+            const divs = ['Vadodara Central', 'Vadodara East', 'Vadodara West', 'Anand Division', 'Bharuch Division'];
+            const subs = ['Subdivision 1', 'Subdivision 2', 'Subdivision 3'];
+            const categories = ['Achiever', 'Potential', 'Improving', 'Inactive'];
+
+            const generated = [];
+            let count = 1;
+
+            divs.forEach(div => {
+                subs.forEach(sub => {
+                    for (let i = 1; i <= 5; i++) {
+                        const poName = `${div.split(' ')[0]} SO-${count++}`;
+                        const targetRev = Math.floor(Math.random() * 800000) + 200000;
+                        const propRev = Math.round(targetRev * 0.33);
+                        const gtdRev = Math.round(propRev * (Math.random() * 0.6 + 0.6));
+                        const annAch = Math.round((gtdRev / targetRev) * 100 * 100) / 100;
+                        const ttdAch = Math.round((gtdRev / propRev) * 100 * 100) / 100;
+
+                        generated.push({
+                            Division: div,
+                            Subdivision: sub,
+                            PO_Name: poName,
+
+                            Annual_Total_Revenue_Target: targetRev,
+                            Proportionate_TTD_TotalRevenue: propRev,
+                            Total_Revenue_GTD: gtdRev,
+                            "% Achievement_Annual_TotalRevenue": annAch,
+                            "% Achievement_TTD_TotalRevenue": ttdAch,
+
+                            Annual_Parcel_Revenue_Target: Math.round(targetRev * 0.3),
+                            Proportionate_TTD_Parcel: Math.round(propRev * 0.3),
+                            Parcel_Revenue_GTD: Math.round(gtdRev * 0.32),
+                            "% Achievement_Annual_Parcel": annAch,
+                            "% Achievement_TTD_Parcel": ttdAch,
+
+                            Annual_InternationalMails_Revenue_Target: Math.round(targetRev * 0.15),
+                            Proportionate_TTD_InternationalMails: Math.round(propRev * 0.15),
+                            InternationalMails_Revenue_GTD: Math.round(gtdRev * 0.14),
+                            "% Achievement_Annual_InternationalMails": annAch,
+                            "% Achievement_TTD_InternationalMails": ttdAch,
+
+                            Annual_DomesticMails_Revenue_Target: Math.round(targetRev * 0.45),
+                            Proportionate_TTD_DomesticMails: Math.round(propRev * 0.45),
+                            DomesticMails_Revenue_GTD: Math.round(gtdRev * 0.44),
+                            "% Achievement_Annual_DomesticMails": annAch,
+                            "% Achievement_TTD_DomesticMails": ttdAch,
+
+                            Annual_POSBNetAddition_Target: Math.floor(Math.random() * 500) + 100,
+                            POSBNetAddition_GTD: Math.floor(Math.random() * 450) + 80,
+                            "% Achievement_Annual_POSBNetAddition": Math.floor(Math.random() * 40) + 70,
+
+                            Total_revenue_category: categories[Math.floor(Math.random() * categories.length)],
+                            Parcel_revenue_category: categories[Math.floor(Math.random() * categories.length)],
+                            InternationalMails_revenue_category: categories[Math.floor(Math.random() * categories.length)],
+                            Domesticmails_revenue_category: categories[Math.floor(Math.random() * categories.length)],
+                            POSB_Netaddition_category: categories[Math.floor(Math.random() * categories.length)]
+                        });
+                    }
+                });
+            });
+
+            processRawData(generated, isBackground);
+            if (!isBackground) showLoading(false);
+        }
+
+        function startAutoRefreshTimer() {
+            if (appState.timerInstance) clearInterval(appState.timerInstance);
+            appState.countdown = 60;
+            const timerEl = document.getElementById('countdownTimer');
+
+            appState.timerInstance = setInterval(() => {
+                appState.countdown--;
+                if (timerEl) timerEl.textContent = appState.countdown;
+
+                if (appState.countdown <= 0) {
+                    appState.countdown = 60;
+                    refreshDataKeepState();
+                }
+            }, 1000);
+        }
+
+        function refreshDataKeepState() {
+            fetchDashboardData(true);
+        }
+
+        function manualRefreshData() {
+            appState.countdown = 60;
+            refreshDataKeepState();
+        }
+
+        function formatNumber(num) {
+            if (num === null || num === undefined || isNaN(num)) return '-';
+            return Math.round(num).toLocaleString('en-IN');
+        }
+
+        function formatPercent(num) {
+            if (num === null || num === undefined || isNaN(num)) return '-';
+            return num.toFixed(2) + '%';
+        }
+<!-- ... existing code -->
